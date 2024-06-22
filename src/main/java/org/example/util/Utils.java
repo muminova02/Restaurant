@@ -27,6 +27,21 @@ public interface Utils {
     };
 
 
+    String CREATE_MENU = "Create menu";
+    String ADD_MEAL = "Add meal";
+    String EDIT_MEAL = "Edit meal";
+    String DELETE_MEAL = "Delete meal";
+    String SHOW_HISTORY = "Show history";
+    String CONFIRM_ORDER = "Confirm order";
+    String[][] mainMenuAdmin = {
+            {CREATE_MENU},
+            {ADD_MEAL,EDIT_MEAL},
+            {DELETE_MEAL,SHOW_HISTORY},
+            {CONFIRM_ORDER}
+    };
+
+
+
 
 
 }

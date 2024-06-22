@@ -14,6 +14,4 @@ public enum UserState implements State{
 
     SEARCH_SAVAT,
 
-
-
 }

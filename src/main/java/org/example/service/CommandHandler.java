@@ -34,6 +34,14 @@ public class CommandHandler {
                         InlineKeyboardButton.builder()
                                 .text(s)
                                 .callbackData(s).build())).build();
+
+    public static InlineKeyboardMarkup adminInline(){
+        InlineKeyboardMarkup build=InlineKeyboardMarkup.builder()
+                .keyboardRow(List.of(
+                        InlineKeyboardButton.builder().text("Yo'q").callbackData("yo'q").build(),
+                        InlineKeyboardButton.builder().text("Ha").callbackData("ha").build()
+                )).build();
+
         return build;
     }
 }

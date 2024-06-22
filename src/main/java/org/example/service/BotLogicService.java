@@ -3,7 +3,9 @@ package org.example.service;
 import org.example.db.Db;
 import org.example.entity.Buyurtma;
 import org.example.entity.Meal;
+import org.example.entity.MenuType;
 import org.example.entity.User;
+import org.example.enums.AdminState;
 import org.example.enums.BuyurtmaState;
 import org.example.enums.UserState;
 import org.example.payload.InlineString;
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 public class BotLogicService {
     private final UserService userServise = UserService.getInstance();
     public final Buyurtma buyurtma = new Buyurtma();
+    public final MenuType menuType=new MenuType();
     private SendMessage sendMessage = new SendMessage();
     private SendMessage sendMessageToAdmin = new SendMessage();
     private Db db = Db.getInstance();
@@ -39,6 +42,10 @@ public class BotLogicService {
                     db.getUsers().put(chatId,currentUser);
                     userStateHandler(update);
 //                   userServise.updateState(chatId,UserState.START);
+                }else if (chatId == 6436944940L ){
+                    userServise.updateState(chatId, AdminState.ADMIN_START);
+//                    userStateHandler(update);
+                    adminStateHandler(chatId,update);
                 }
             }
             case Utils.SHOW_MENU-> {
@@ -122,9 +129,42 @@ public class BotLogicService {
                 botService.executeMessages(sendMessage);
                 userServise.updateState(chatId,UserState.MAIN_MENU);
             }
+            case Utils.CREATE_MENU -> {
+                sendMessageToAdmin.setText("Menuga mahsulot qo'shishni xoxlaysizmi");
+                sendMessageToAdmin.setReplyMarkup(CommandHandler.adminInline());
+                botService.executeMessages(sendMessageToAdmin);
+               // userServise.updateState(chatId,AdminState.SEND_PRODUCT_PHOTO);
+            }
             default -> {
                 userStateHandler(update);
             }
+        }
+    }
+
+    private void adminStateHandler(Long chatId, Update update) {
+        String text = update.getMessage().getText();
+        sendMessageToAdmin.setChatId(chatId);
+        AdminState adminState=userServise.getAdminState(chatId);
+        switch (adminState){
+            case ADMIN_START -> {
+                sendMessageToAdmin.setText("Siz admin qilib tayinlandingiz ");
+                sendMessageToAdmin.setReplyMarkup(replyService.keyboardMaker(Utils.mainMenuAdmin));
+                userServise.updateState(chatId,AdminState.ADMIN_MENU);
+                botService.executeMessages(sendMessageToAdmin);
+            }
+            case SEND_PRODUCT_PHOTO -> {
+                menuType.setPhoto(text);
+                sendMessageToAdmin.setText("Product nomini kiriting");
+                botService.executeMessages(sendMessageToAdmin);
+                userServise.updateState(chatId,AdminState.SEND_PRODUCT_NAME);
+            }
+            case SEND_PRODUCT_NAME -> {
+                menuType.setTitle(text);
+                sendMessageToAdmin.setText("Menuga mahsulot qo'shishni xoxlaysizmi");
+                sendMessageToAdmin.setReplyMarkup(CommandHandler.adminInline());
+                botService.executeMessages(sendMessageToAdmin);
+            }
+
         }
     }
 
@@ -132,7 +172,7 @@ public class BotLogicService {
         Long chatId = update.getMessage().getChatId();
         String text = update.getMessage().getText();
         System.out.println(chatId);
-        User currentUser1 = db.getUsers().get(chatId);
+//        User currentUser1 = db.getUsers().get(chatId);
         sendMessage.setReplyMarkup(null);
         sendMessage.setChatId(chatId);
         UserState state = userServise.getUserState(chatId);
@@ -194,6 +234,7 @@ public class BotLogicService {
                 });
 
             }
+
             default -> {
                 sendMessage.setText("Menuni tanlang");
                 sendMessage.setReplyMarkup(replyService.keyboardMaker(Utils.mainMenuUser));

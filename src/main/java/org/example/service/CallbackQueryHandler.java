@@ -3,8 +3,11 @@ package org.example.service;
 //import delivery.Maps;
 //import delivery.Steps;
 //import model_repo.BasketRepo;
+import lombok.RequiredArgsConstructor;
 import org.example.db.Db;
 import org.example.entity.Buyurtma;
+import org.example.entity.MenuType;
+import org.example.enums.AdminState;
 import org.example.enums.BuyurtmaState;
 import org.example.enums.UserState;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -19,8 +22,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-
+@RequiredArgsConstructor
 public class CallbackQueryHandler {
+
    private static UserService userService = UserService.getInstance();
 //  private static BotLogicService botLogicService = BotLogicService.getInstance();
     private static Db db = Db.getInstance();
@@ -30,7 +34,15 @@ public class CallbackQueryHandler {
             incrementQuantity(callbackQueryHandler, bot);
         } else if (callbackQueryHandler.getData().startsWith("-")) {
             decrementQuantity(callbackQueryHandler, bot);
-        } else if (callbackQueryHandler.getData().startsWith("basket")) {
+        }
+        else if (callbackQueryHandler.getData().equals("ha")){
+            bot.execute(new SendMessage(chatId1.toString(),"Mahsulot photosini kiriting"));
+            UserService.updateState(chatId1, AdminState.SEND_PRODUCT_PHOTO);
+          /*  MenuType menuType1=new MenuType();
+            MenuType menuType=BotLogicService.getInstance().menuType;
+            menuType1.setPhoto(menuType.getPhoto());
+            menuType1.setTitle(menuType.getTitle());*/
+        }else if (callbackQueryHandler.getData().startsWith("basket")) {
 
             String[] split = callbackQueryHandler.getData().split(";");
             Buyurtma buyurtma1 = BotLogicService.getInstance().buyurtma;

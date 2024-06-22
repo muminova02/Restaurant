@@ -2,6 +2,7 @@ package org.example.db;
 
 import lombok.*;
 import org.example.entity.*;
+
 import org.example.enums.UserState;
 
 import java.util.*;
@@ -13,9 +14,13 @@ public class Db {
     private final HashMap<Long,User> users = new HashMap<>();
 
     private final HashMap<Long,ArrayList<Buyurtma>> mySavat = new HashMap<>();
+
     private final HashMap<Long,Xabar> xabarlar=new HashMap<>();
 
+    private final Set<MenuType> menuTypeSet=new HashSet<>();
 
+
+    private final HashMap<Long,ArrayList<Buyurtma>> buyurtma = new HashMap<>();
 
 
 
@@ -75,6 +80,9 @@ public class Db {
                     meals.add(new Meal("Dablchizburger","PhotoMeal","This is describtion",123d));
                 }
             });
+            User user = new User(6436944940L,"Muqaddas","+99909992999", AdminState.DEFAULT);
+            db.getUsers().put(6436944940L,user);
+
         }
         return db;
     }
@@ -83,4 +91,11 @@ public class Db {
         xabarlar.put(chatId,xabar);
 
     }
+
+    public void createMenu(MenuType menu){
+        menuTypeSet.add(menu);
+    }
+
+
+
 }

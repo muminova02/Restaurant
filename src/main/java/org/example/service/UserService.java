@@ -4,6 +4,7 @@ import org.example.db.Db;
 import org.example.entity.Buyurtma;
 import org.example.entity.MenuType;
 import org.example.entity.User;
+import org.example.enums.AdminState;
 import org.example.enums.State;
 import org.example.enums.UserState;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -12,11 +13,11 @@ import java.util.*;
 
 public class UserService {
 
-    private final Db db = Db.getInstance();
+    private static final Db db = Db.getInstance();
     private final ReplyMarkupService replyMarkupService = new ReplyMarkupService();
     private final InlineMarkupService inlineMarkupService = new InlineMarkupService();
 
-    public void updateState(Long chatId, State state){
+    public static void updateState(Long chatId, State state){
         HashMap<Long, User> users = db.getUsers();
         users.forEach((aLong, user) ->{
             if(Objects.equals(aLong, chatId)){
@@ -37,6 +38,12 @@ public class UserService {
         return (UserState) user1.getState();
     }
 
+    public AdminState getAdminState(Long chatId){
+        HashMap<Long, User> users = db.getUsers();
+        User user1 = users.get(chatId);
+        return (AdminState) user1.getState();
+    }
+
     public void addBuyurtma(Long chatId, Buyurtma buyurtma) {
         if (!db.getMySavat().containsKey(chatId)) {
             HashMap<Long, ArrayList<Buyurtma>> mySavat = db.getMySavat();
@@ -45,6 +52,16 @@ public class UserService {
             mySavat.put(chatId,buyurtmas);
         }else {
             db.getMySavat().get(chatId).add(buyurtma);
+        }
+    }
+
+    public void addOrder(Long chatId, ArrayList<Buyurtma> userSavatToBuyurtma) {
+        if (!db.getBuyurtma().containsKey(chatId)) {
+            HashMap<Long, ArrayList<Buyurtma>> buyurtma = db.getBuyurtma();
+            ArrayList<Buyurtma> orders = new ArrayList<>(userSavatToBuyurtma);
+            buyurtma.put(chatId,orders);
+        }else {
+            db.getBuyurtma().get(chatId).addAll(userSavatToBuyurtma);
         }
     }
 

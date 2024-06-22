@@ -51,8 +51,8 @@ public class CallbackQueryHandler {
             buyurtma.setName(buyurtma1.getName());
             buyurtma.setPhone(buyurtma1.getPhone());
             buyurtma.setPrice(buyurtma1.getPrice());
-            buyurtma.setMealName(buyurtma.getMealName());
-            buyurtma.setMenuType(buyurtma.getMenuType());
+            buyurtma.setMealName(buyurtma1.getMealName());
+            buyurtma.setMenuType(buyurtma1.getMenuType());
             buyurtma.setCount(Integer.parseInt(split[2]));
             Long chatId = chatId1;
             buyurtma.setState(BuyurtmaState.SAVATDA);
@@ -89,6 +89,11 @@ public class CallbackQueryHandler {
                     .build();
             bot.execute(build);
             userService.updateState(chatId1, UserState.SEARCH_SAVAT);
+        } else if (callbackQueryHandler.getData().equals("Kutilmoqda")) {
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(chatId1);
+            sendMessage.setText("Yuborilgan Buyurtmangiz Kutilmoqda");
+            bot.execute(sendMessage);
         }
     }
 

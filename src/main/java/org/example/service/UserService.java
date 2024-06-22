@@ -55,6 +55,16 @@ public class UserService {
         }
     }
 
+    public void addOrder(Long chatId, ArrayList<Buyurtma> userSavatToBuyurtma) {
+        if (!db.getBuyurtma().containsKey(chatId)) {
+            HashMap<Long, ArrayList<Buyurtma>> buyurtma = db.getBuyurtma();
+            ArrayList<Buyurtma> orders = new ArrayList<>(userSavatToBuyurtma);
+            buyurtma.put(chatId,orders);
+        }else {
+            db.getBuyurtma().get(chatId).addAll(userSavatToBuyurtma);
+        }
+    }
+
     private static UserService userService;
 
     public static UserService getInstance() {

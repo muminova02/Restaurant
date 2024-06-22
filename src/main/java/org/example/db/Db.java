@@ -19,7 +19,7 @@ public class Db {
     private final HashMap<Long,ArrayList<Buyurtma>> mySavat = new HashMap<>();
     private final Set<MenuType> menuTypeSet=new HashSet<>();
 
-
+    private final HashMap<Long,ArrayList<Buyurtma>> buyurtma = new HashMap<>();
 
 
 

@@ -18,6 +18,13 @@ public interface Utils {
             {XABAR_YUBORISH,SOZLAMALAR},
             {BIZ_HAQIMIZDA}
     };
+    String BUYURTMA = "Buyurtma berish";
+    String[][] savatMenu = {
+            {BUYURTMA,"orqaga"},
+    };
+    String[][] order_menu = {
+            {ALOQA,"orqaga"},
+    };
 
 
 

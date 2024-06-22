@@ -11,6 +11,8 @@ import org.example.util.Utils;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.util.ArrayList;
+
 public class BotLogicService {
     private final UserService userServise = UserService.getInstance();
     public final Buyurtma buyurtma = new Buyurtma();
@@ -46,18 +48,64 @@ public class BotLogicService {
                 userServise.updateState(chatId,UserState.CHOOSE_MENU);
             }
             case Utils.MY_ORDERS -> {
+                ArrayList<Buyurtma> buyurtmas = db.getBuyurtma().get(chatId);
+                if (buyurtmas.isEmpty()) {
+                    sendMessage.setText("Buyurtma Mavjud Emas");
+                    sendMessage.setReplyMarkup(replyService.keyboardMaker(Utils.order_menu));
+                    botService.executeMessages(sendMessage);
+                    return;
+                }
 
+                StringBuilder ordersOneUser = new StringBuilder();
+                User user = db.getUsers().get(chatId);
+                ordersOneUser.append(user.getName()).append("\n");
+                ordersOneUser.append(user.getPhoneNumber()).append("\n");
+                int i=1;
+                for (Buyurtma buyurtma : buyurtmas) {
+                    ordersOneUser.append(i++).append("-> ");
+                    ordersOneUser.append(buyurtma.getMenuType()).append("\n      ");
+                    ordersOneUser.append(buyurtma.getMealName()).append("\n      ");
+                    ordersOneUser.append(buyurtma.getCount()).append("\n      ");
+                    ordersOneUser.append(buyurtma.getPrice()).append("\n      ");
+                }
+                sendMessage.setText(ordersOneUser.toString());
+                sendMessage.setReplyMarkup(CommandHandler.orderInline("Kutilmoqda"));
+                SendMessage sendMessage1 = new SendMessage();
+                sendMessage1.setChatId(chatId);
+                sendMessage1.setText("");
+                sendMessage1.setReplyMarkup(replyService.keyboardMaker(Utils.order_menu));
+                botService.executeMessages(sendMessage);
+                botService.executeMessages(sendMessage1);
+                userServise.updateState(chatId,UserState.MAIN_MENU);
             }
             case Utils.SAVAT -> {
                 for (Buyurtma buyurtma1 : db.getMySavat().get(chatId)) {
                     sendMessage.setText(buyurtma1.toString());
                     sendMessage.setReplyMarkup(CommandHandler.buyurtmaInline(buyurtma1));
                     botService.executeMessages(sendMessage);
-                    userServise.updateState(chatId,UserState.SEARCH_SAVAT);
                 }
+                SendMessage sendMessage1 = new SendMessage();
+                sendMessage1.setChatId(chatId);
+                sendMessage1.setText("Buyurtmani bekor qilish uchun - tugmasini bosing, \n buyurtma berish uchun buyurtma berishni bosing\nbuyurtmalariningiz tasdiqlash uchun yubpriladi");
+                sendMessage1.setReplyMarkup(replyService.keyboardMaker(Utils.savatMenu));
+                botService.executeMessages(sendMessage1);
+                userServise.updateState(chatId,UserState.SEARCH_SAVAT);
             }
-            case Utils.ALOQA -> {
+            case Utils.BUYURTMA ->{
+                ArrayList<Buyurtma> userSavatToBuyurtma = db.getMySavat().get(chatId);
+                userServise.addOrder(chatId,userSavatToBuyurtma);
+                db.getMySavat().get(chatId).clear();
+                sendMessage.setText("Buyurtma jo'natildi");
+                botService.executeMessages(sendMessage);
+                userServise.updateState(chatId,UserState.MAIN_MENU);
 
+
+
+            }
+
+            case Utils.ALOQA -> {
+                sendMessage.setText("Agar biror muammo tug'ilgan bo'lsa +998901234567 yoki" +
+                        " +998912345678 shu raqamlarga murojat qilishingiz mumkin");
             }
             case Utils.XABAR_YUBORISH -> {
 
@@ -134,6 +182,7 @@ public class BotLogicService {
                                 User user = db.getUsers().get(chatId);
                                 buyurtma.setName(user.getName());
                                 buyurtma.setPhone(user.getPhoneNumber());
+                                buyurtma.setPrice(meal.getPrice());
                                 sendMessage.setText("Photo\n"+"name:"+meal.getTitle()+"\nDescription: "+ meal.getDescription()
                                         +"\nPrice: " + meal.getPrice());
                                 sendMessage.setReplyMarkup(CommandHandler.productMurkup(1,Long.parseLong(meal.getId())));

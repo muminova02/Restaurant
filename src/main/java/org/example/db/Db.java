@@ -17,7 +17,7 @@ public class Db {
 
     private final HashMap<Long,ArrayList<Buyurtma>> mySavat = new HashMap<>();
 
-
+    private final HashMap<Long,ArrayList<Buyurtma>> buyurtma = new HashMap<>();
 
 
 

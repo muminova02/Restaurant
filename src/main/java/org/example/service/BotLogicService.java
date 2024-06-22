@@ -5,6 +5,7 @@ import org.example.entity.Buyurtma;
 import org.example.entity.Meal;
 import org.example.entity.MenuType;
 import org.example.entity.User;
+import org.example.entity.Xabar;
 import org.example.enums.AdminState;
 import org.example.enums.BuyurtmaState;
 import org.example.enums.UserState;
@@ -24,6 +25,7 @@ public class BotLogicService {
     private Db db = Db.getInstance();
     private BotService botService = BotService.getInstance();
     private final User currentUser =new User();
+    private final Xabar xabar=new Xabar();
     private final ReplyMarkupService replyService = new ReplyMarkupService();
     private final InlineMarkupService inlineService = new InlineMarkupService();
 
@@ -98,6 +100,11 @@ public class BotLogicService {
                 botService.executeMessages(sendMessage1);
                 userServise.updateState(chatId,UserState.SEARCH_SAVAT);
             }
+            case Utils.ALOQA -> {
+                sendMessage.setText("Agar biror muammo tug'ilgan bo'lsa +998901234567 yoki" +
+                        " +998912345678 shu raqamlarga murojat qilishingiz mumkin");
+                botService.executeMessages(sendMessage);
+             }
             case Utils.BUYURTMA ->{
                 ArrayList<Buyurtma> userSavatToBuyurtma = db.getMySavat().get(chatId);
                 userServise.addOrder(chatId,userSavatToBuyurtma);
@@ -107,7 +114,6 @@ public class BotLogicService {
                 userServise.updateState(chatId,UserState.MAIN_MENU);
 
 
-
             }
 
             case Utils.ALOQA -> {
@@ -115,13 +121,21 @@ public class BotLogicService {
                         " +998912345678 shu raqamlarga murojat qilishingiz mumkin");
             }
             case Utils.XABAR_YUBORISH -> {
+                sendMessage.setText("Xabaringizni yozing : ");
+                botService.executeMessages(sendMessage);
+                userServise.updateState(chatId,UserState.WRITING);
+
 
             }
             case Utils.SOZLAMALAR -> {
-
+               sendMessage.setText("Sozlamar bo'limiga xush kelibsiz ");
+               sendMessage.setReplyMarkup(replyService.keyboardMaker(Utils.sozlamalarMenu));
+               botService.executeMessages(sendMessage);
             }
             case Utils.BIZ_HAQIMIZDA -> {
-
+                sendMessage.setText("Restaranimizning birinchi filiali 2006 yilda ochilgan bo’lib, shu kungacha muvaffaqiyatli faoliyat yuritib kelmoqdaligini bilarmidingiz? \n" +
+                        "15 yil davomida kompaniya avtobus bekatidagi kichik ovqatlanish joyidan zamonaviy, kengaytirilgan tarmoqqa aylandi, u bugungi kunda O‘zbekiston bo‘ylab 60 dan ortiq restoranlarni, o‘zining eng tezkor yetkazib berish xizmatini, zamonaviy IT-infratuzilmasini va 2000 dan ortiq xodimlarni o‘z ichiga oladi.");
+                    botService.executeMessages(sendMessage);
             }
             case "orqaga"->{
                 sendMessage.setText("main menu");
@@ -234,7 +248,13 @@ public class BotLogicService {
                 });
 
             }
-
+            case WRITING -> {
+                xabar.setDesc(text);
+                xabar.setChatId(chatId);
+                db.setXabar(chatId,xabar);
+                sendMessage.setText("Xabaringiz qabul qilindi tez orada siz bilan bog'lanamiz ;)");
+                botService.executeMessages(sendMessage);
+            }
             default -> {
                 sendMessage.setText("Menuni tanlang");
                 sendMessage.setReplyMarkup(replyService.keyboardMaker(Utils.mainMenuUser));

@@ -1,11 +1,8 @@
 package org.example.db;
 
 import lombok.*;
-import org.example.entity.Buyurtma;
-import org.example.entity.Meal;
-import org.example.entity.MenuType;
-import org.example.entity.User;
-import org.example.enums.AdminState;
+import org.example.entity.*;
+
 import org.example.enums.UserState;
 
 import java.util.*;
@@ -17,7 +14,11 @@ public class Db {
     private final HashMap<Long,User> users = new HashMap<>();
 
     private final HashMap<Long,ArrayList<Buyurtma>> mySavat = new HashMap<>();
+
+    private final HashMap<Long,Xabar> xabarlar=new HashMap<>();
+
     private final Set<MenuType> menuTypeSet=new HashSet<>();
+
 
     private final HashMap<Long,ArrayList<Buyurtma>> buyurtma = new HashMap<>();
 
@@ -52,9 +53,31 @@ public class Db {
                 if (menuType.getTitle().equals("Ichimlik")){
                     meals.add(new Meal("Kola","PhotoMeal","This is description",123d));
                     meals.add(new Meal("Pepsi","PhotoMeal","This is description",123d));
-                    meals.add(new Meal("dinay","PhotoMeal","This is description",123d));
-                    meals.add(new Meal("asdf","PhotoMeal","This is description",123d));
-                    meals.add(new Meal("asdfdd","PhotoMeal","This is description",123d));
+                    meals.add(new Meal("Dinay","PhotoMeal","This is description",123d));
+                    meals.add(new Meal("Fanta","PhotoMeal","This is description",123d));
+                    meals.add(new Meal("Maxito","PhotoMeal","This is description",123d));
+                }else if(menuType.getTitle().equals("Ovqatlar")){
+                    meals.add(new Meal("Sho'rva","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("Palov","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("Mastava","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("Besh barmoq","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("Chuchvara","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("Qotirma","PhotoMeal","This is describtion",123d));
+                }else if(menuType.getTitle().equals("Salatlar")){
+                    meals.add(new Meal("Sezar","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("aliviya","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("muskoy kapriz","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("svejiy salat","PhotoMeal","This is describtion",123d));
+                }else if(menuType.getTitle().equals("Muzqaymoqlar")){
+                    meals.add(new Meal("qulpnayli muzqaymoq","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("shokoladli muzqaymoq","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("bananli muzqaymoq","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("oddiy muzqaymoq","PhotoMeal","This is describtion",123d));
+                }else if(menuType.getTitle().equals("Burgers")){
+                    meals.add(new Meal("Gamburger","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("Chizburger","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("Dablburger","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("Dablchizburger","PhotoMeal","This is describtion",123d));
                 }
             });
             User user = new User(6436944940L,"Muqaddas","+99909992999", AdminState.DEFAULT);
@@ -63,9 +86,16 @@ public class Db {
         }
         return db;
     }
+
+    public void setXabar(Long chatId ,Xabar xabar) {
+        xabarlar.put(chatId,xabar);
+
+    }
+
     public void createMenu(MenuType menu){
         menuTypeSet.add(menu);
     }
+
 
 
 }

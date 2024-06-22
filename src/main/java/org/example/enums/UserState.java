@@ -13,5 +13,7 @@ public enum UserState implements State{
     CHOOSE_COUNT,
 
     SEARCH_SAVAT,
+    ALOQA,
+    WRITING
 
 }

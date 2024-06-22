@@ -12,6 +12,6 @@ public enum UserState implements State{
     CHOOSE_MEAL,
     CHOOSE_COUNT,
 
-    SEARCH_SAVAT
+    SEARCH_SAVAT,
 
 }

@@ -5,6 +5,7 @@ import org.example.entity.Buyurtma;
 import org.example.entity.Meal;
 import org.example.entity.MenuType;
 import org.example.entity.User;
+import org.example.enums.AdminState;
 import org.example.enums.UserState;
 
 import java.util.*;
@@ -16,6 +17,7 @@ public class Db {
     private final HashMap<Long,User> users = new HashMap<>();
 
     private final HashMap<Long,ArrayList<Buyurtma>> mySavat = new HashMap<>();
+    private final Set<MenuType> menuTypeSet=new HashSet<>();
 
 
 
@@ -55,7 +57,15 @@ public class Db {
                     meals.add(new Meal("asdfdd","PhotoMeal","This is description",123d));
                 }
             });
+            User user = new User(6436944940L,"Muqaddas","+99909992999", AdminState.DEFAULT);
+            db.getUsers().put(6436944940L,user);
+
         }
         return db;
     }
+    public void createMenu(MenuType menu){
+        menuTypeSet.add(menu);
+    }
+
+
 }

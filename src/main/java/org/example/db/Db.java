@@ -107,19 +107,19 @@ public class Db {
                     meals.add(new Meal("Qotirma","PhotoMeal","200 gr gosht 100 gr kartoshka pors",38000d));
                 }else if(menuType.getTitle().equals("Salatlar")){
                     meals.add(new Meal("Sezar","PhotoMeal","Mayanezli salat",12000d));
-                    meals.add(new Meal("aliviya","PhotoMeal","This is describtion",123d));
-                    meals.add(new Meal("muskoy kapriz","PhotoMeal","This is describtion",123d));
-                    meals.add(new Meal("svejiy salat","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("aliviya","PhotoMeal","Mayanezli salat ",13000d));
+                    meals.add(new Meal("muskoy kapriz","PhotoMeal","Mayanezli salat",12000d));
+                    meals.add(new Meal("svejiy salat","PhotoMeal","Pamidor bodring",5000d));
                 }else if(menuType.getTitle().equals("Muzqaymoqlar")){
-                    meals.add(new Meal("qulpnayli muzqaymoq","PhotoMeal","This is describtion",123d));
-                    meals.add(new Meal("shokoladli muzqaymoq","PhotoMeal","This is describtion",123d));
-                    meals.add(new Meal("bananli muzqaymoq","PhotoMeal","This is describtion",123d));
-                    meals.add(new Meal("oddiy muzqaymoq","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("qulpnayli muzqaymoq","PhotoMeal","Qulpnay siropli",10000d));
+                    meals.add(new Meal("shokoladli muzqaymoq","PhotoMeal","Shokolad siropli",10000d));
+                    meals.add(new Meal("bananli muzqaymoq","PhotoMeal","Banan siropli",10000d));
+                    meals.add(new Meal("oddiy muzqaymoq","PhotoMeal","Meva qoshilmagan",10000d));
                 }else if(menuType.getTitle().equals("Burgers")){
-                    meals.add(new Meal("Gamburger","PhotoMeal","This is describtion",123d));
-                    meals.add(new Meal("Chizburger","PhotoMeal","This is describtion",123d));
-                    meals.add(new Meal("Dablburger","PhotoMeal","This is describtion",123d));
-                    meals.add(new Meal("Dablchizburger","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("Gamburger","PhotoMeal","Katletli",14000d));
+                    meals.add(new Meal("Chizburger","PhotoMeal","Sirli",15000d));
+                    meals.add(new Meal("Dablburger","PhotoMeal","2x katletli",26000d));
+                    meals.add(new Meal("Dablchizburger","PhotoMeal","2x sirli",28000d));
                 }
             });
             User user = new User(6436944940L,"Muqaddas","+99909992999", AdminState.DEFAULT);

@@ -1,5 +1,6 @@
 package org.example.service;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import org.example.db.Db;
 import org.example.entity.Buyurtma;
 import org.example.entity.Meal;
@@ -175,6 +176,12 @@ public class BotLogicService {
             }
             case PHONE_NUMBER -> {
                 User user = db.getUsers().get(chatId);
+                String s = validatePhoneNumber(text);
+                if (s!=null){
+                    sendMessage.setText(s);
+                    botService.executeMessages(sendMessage);
+                return;
+                }
                 user.setPhoneNumber(text);
                 userServise.updateState(chatId,UserState.MAIN_MENU);
 
@@ -344,7 +351,14 @@ public class BotLogicService {
 //    public void callbackHandler(Update update) {
 //
 //    }
-
+public String validatePhoneNumber(String phoneNumber) {
+    // Regex to match Uzbek phone numbers: +998 followed by 9 digits
+    String phoneRegex = "^\\+998[0-9]{9}$";
+    if (!phoneNumber.matches(phoneRegex)) {
+        return "Telefon raqami +998 bilan boshlanishi va 9 ta raqamdan iborat bo'lishi kerak.";
+    }
+    return null;
+}
     private static BotLogicService botLogicService;
 
     public static BotLogicService getInstance() {

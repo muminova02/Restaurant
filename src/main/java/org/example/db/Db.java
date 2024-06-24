@@ -93,20 +93,20 @@ public class Db {
             db.getAllMeals().put(new MenuType("Burgers","photo"),new ArrayList<>());
             db.getAllMeals().forEach((menuType, meals) -> {
                 if (menuType.getTitle().equals("Ichimlik")){
-                    meals.add(new Meal("Kola","PhotoMeal","This is description",123d));
-                    meals.add(new Meal("Pepsi","PhotoMeal","This is description",123d));
-                    meals.add(new Meal("Dinay","PhotoMeal","This is description",123d));
-                    meals.add(new Meal("Fanta","PhotoMeal","This is description",123d));
-                    meals.add(new Meal("Maxito","PhotoMeal","This is description",123d));
+                    meals.add(new Meal("Kola","PhotoMeal"," 1 litrli",10000d));
+                    meals.add(new Meal("Pepsi","PhotoMeal","1 litrli",12000d));
+                    meals.add(new Meal("Dinay","PhotoMeal","1 litrli",9000d));
+                    meals.add(new Meal("Fanta","PhotoMeal","G1 litrli",10000d));
+                    meals.add(new Meal("Maxito","PhotoMeal","0.5 banchniy",13000d));
                 }else if(menuType.getTitle().equals("Ovqatlar")){
-                    meals.add(new Meal("Sho'rva","PhotoMeal","This is describtion",123d));
-                    meals.add(new Meal("Palov","PhotoMeal","This is describtion",123d));
-                    meals.add(new Meal("Mastava","PhotoMeal","This is describtion",123d));
-                    meals.add(new Meal("Besh barmoq","PhotoMeal","This is describtion",123d));
-                    meals.add(new Meal("Chuchvara","PhotoMeal","This is describtion",123d));
-                    meals.add(new Meal("Qotirma","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("Sho'rva","PhotoMeal","Toshkent shorva pors",35000d));
+                    meals.add(new Meal("Palov","PhotoMeal","Samarqand oshi pors",40000d));
+                    meals.add(new Meal("Mastava","PhotoMeal","Naxorgi mastava pors",30000d));
+                    meals.add(new Meal("Besh barmoq","PhotoMeal","Salat qoshimchasi bilan pors",45000d));
+                    meals.add(new Meal("Chuchvara","PhotoMeal","Mazali chuchvara pors",23000d));
+                    meals.add(new Meal("Qotirma","PhotoMeal","200 gr gosht 100 gr kartoshka pors",38000d));
                 }else if(menuType.getTitle().equals("Salatlar")){
-                    meals.add(new Meal("Sezar","PhotoMeal","This is describtion",123d));
+                    meals.add(new Meal("Sezar","PhotoMeal","Mayanezli salat",12000d));
                     meals.add(new Meal("aliviya","PhotoMeal","This is describtion",123d));
                     meals.add(new Meal("muskoy kapriz","PhotoMeal","This is describtion",123d));
                     meals.add(new Meal("svejiy salat","PhotoMeal","This is describtion",123d));

@@ -27,6 +27,9 @@ public interface Utils {
     String[][] order_menu = {
             {ALOQA,"orqaga"},
     };
+    String[][] order_Admin_menu = {
+            {"orqaga"},
+    };
 
 
     String CREATE_MENU = "Create menu";
@@ -52,6 +55,9 @@ String [][] sozlamalarMenu={
         {MALUMOTLARNI_TOZALASH},
         {ORQAGA}
 };
+    String [][] create_menu={
+            {CREATE_MENU,ORQAGA}
+    };
 
 
 }

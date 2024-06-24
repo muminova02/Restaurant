@@ -7,11 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.example.db.Db;
 import org.example.entity.Buyurtma;
 import org.example.entity.MenuType;
+import org.example.entity.User;
 import org.example.enums.AdminState;
 import org.example.enums.BuyurtmaState;
 import org.example.enums.UserState;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -36,65 +38,97 @@ public class CallbackQueryHandler {
             decrementQuantity(callbackQueryHandler, bot);
         }
         else if (callbackQueryHandler.getData().equals("ha")){
-            bot.execute(new SendMessage(chatId1.toString(),"Mahsulot photosini kiriting"));
-            UserService.updateState(chatId1, AdminState.SEND_PRODUCT_PHOTO);
+//            bot.execute(new SendMessage(chatId1.toString(),"Mahsulot photosini kiriting"));
+//            UserService.updateState(chatId1, AdminState.SEND_PRODUCT_PHOTO);
           /*  MenuType menuType1=new MenuType();
             MenuType menuType=BotLogicService.getInstance().menuType;
             menuType1.setPhoto(menuType.getPhoto());
             menuType1.setTitle(menuType.getTitle());*/
         }else if (callbackQueryHandler.getData().startsWith("basket")) {
-
-            String[] split = callbackQueryHandler.getData().split(";");
-            Buyurtma buyurtma1 = BotLogicService.getInstance().buyurtma;
-            Buyurtma buyurtma = new Buyurtma();
-            buyurtma.setProductId(split[1]);
-            buyurtma.setName(buyurtma1.getName());
-            buyurtma.setPhone(buyurtma1.getPhone());
-            buyurtma.setPrice(buyurtma1.getPrice());
-            buyurtma.setMealName(buyurtma1.getMealName());
-            buyurtma.setMenuType(buyurtma1.getMenuType());
-            buyurtma.setCount(Integer.parseInt(split[2]));
-            Long chatId = chatId1;
-            buyurtma.setState(BuyurtmaState.SAVATDA);
-            userService.addBuyurtma(chatId,buyurtma);
-            buyurtma1.clear();
-            bot.execute(new SendMessage(chatId.toString(), "Successfully added ✅"));
-            userService.updateState(chatId, UserState.CHOOSE_MEAL);
-//
+            addBasket(callbackQueryHandler, bot, chatId1);
 //            TextHandler.menuButtons(callbackQueryHandler.getMessage(), bot);
 //            Maps.USER_STEPS.put(callbackQueryHandler.getMessage().getChatId(), Steps.MENU);
         }
         if (userService.getState(callbackQueryHandler.getMessage().getChatId()).equals(UserState.SEARCH_SAVAT)) {
-            HashMap<Long, ArrayList<Buyurtma>> mySavat = db.getMySavat();
-            ArrayList<Buyurtma> buyurtmas = mySavat.get(chatId1);
-            String data = callbackQueryHandler.getData();
-            buyurtmas.removeIf(buyurtma -> buyurtma.getProductId().equals(data));
-
-//        for (Buyurtma buyurtma1 : db.getMySavat().get(chatId1)) {
-//            sendMessage.setText(buyurtma1.toString());
-//            sendMessage.setReplyMarkup(CommandHandler.buyurtmaInline(buyurtma1));
-//            botService.executeMessages(sendMessage);
-//            userServise.updateState(chatId,UserState.SEARCH_SAVAT);
-//        }
-
-            InlineKeyboardMarkup inlineKeyboardMarkup = InlineKeyboardMarkup.builder()
-                    .keyboardRow(List.of(
-                            InlineKeyboardButton.builder()
-                                    .text(" O'chirildi ")
-                                    .callbackData("what").build())).build();
-            EditMessageReplyMarkup build = EditMessageReplyMarkup.builder()
-                    .replyMarkup(inlineKeyboardMarkup)
-                    .chatId(callbackQueryHandler.getMessage().getChatId())
-                    .messageId(callbackQueryHandler.getMessage().getMessageId())
-                    .build();
-            bot.execute(build);
-            userService.updateState(chatId1, UserState.SEARCH_SAVAT);
-        } else if (callbackQueryHandler.getData().equals("Kutilmoqda")) {
+            deleteBuyurtmaInSavat(callbackQueryHandler, bot, chatId1);
+        } else if (callbackQueryHandler.getData().equals(String.valueOf(BuyurtmaState.KUTILMOQADA))) {
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId(chatId1);
             sendMessage.setText("Yuborilgan Buyurtmangiz Kutilmoqda");
             bot.execute(sendMessage);
+        } else if (callbackQueryHandler.getData().equals(String.valueOf(BuyurtmaState.CANCELED))) {
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(chatId1);
+            sendMessage.setText("Bazi sabablarga bu ko'ra buyurtma bekor qilindi");
+            bot.execute(sendMessage);
+        } else if (callbackQueryHandler.getData().equals(String.valueOf(BuyurtmaState.CONFIRMED))) {
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(chatId1);
+            sendMessage.setText("Buyurtma tasdiqlandi, Tez Orada yetib boradi");
+            bot.execute(sendMessage);
+        } else if(callbackQueryHandler.getData().startsWith("Confirm")){
+            String[] split = callbackQueryHandler.getData().split(";");
+            Buyurtma buyurtma = db.getBuyurtma(split[1]);
+            if (buyurtma == null) {
+                System.out.println("somthing wrong");
+                return;
+            }
+            buyurtma.setState(BuyurtmaState.CONFIRMED);
+            DeleteMessage deleteMessage = new DeleteMessage(String.valueOf(chatId1), callbackQueryHandler.getMessage().getMessageId());
+            db.getHistory().add(buyurtma);
+            bot.execute(deleteMessage);
+        }else if (callbackQueryHandler.getData().startsWith("Canceled")){
+            String[] split = callbackQueryHandler.getData().split(";");
+            Buyurtma buyurtma = db.getBuyurtma(split[1]);
+            if (buyurtma == null) {
+                System.out.println("somthing wrong");
+                return;
+            }
+            buyurtma.setState(BuyurtmaState.CANCELED);
+            DeleteMessage deleteMessage = new DeleteMessage(String.valueOf(chatId1), callbackQueryHandler.getMessage().getMessageId());
+            db.getHistory().add(buyurtma);
+            bot.execute(deleteMessage);
         }
+    }
+
+    private static void deleteBuyurtmaInSavat(CallbackQuery callbackQueryHandler, TelegramLongPollingBot bot, Long chatId1) throws TelegramApiException {
+        HashMap<Long, ArrayList<Buyurtma>> mySavat = db.getMySavat();
+        ArrayList<Buyurtma> buyurtmas = mySavat.get(chatId1);
+        String data = callbackQueryHandler.getData();
+        buyurtmas.removeIf(buyurtma -> buyurtma.getProductId().equals(data));
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = InlineKeyboardMarkup.builder()
+                .keyboardRow(List.of(
+                        InlineKeyboardButton.builder()
+                                .text(" O'chirildi ")
+                                .callbackData("what").build())).build();
+        EditMessageReplyMarkup build = EditMessageReplyMarkup.builder()
+                .replyMarkup(inlineKeyboardMarkup)
+                .chatId(callbackQueryHandler.getMessage().getChatId())
+                .messageId(callbackQueryHandler.getMessage().getMessageId())
+                .build();
+        bot.execute(build);
+        userService.updateState(chatId1, UserState.SEARCH_SAVAT);
+    }
+
+    private static void addBasket(CallbackQuery callbackQueryHandler, TelegramLongPollingBot bot, Long chatId1) throws TelegramApiException {
+        String[] split = callbackQueryHandler.getData().split(";");
+        Buyurtma buyurtma1 = BotLogicService.getInstance().buyurtma;
+        Buyurtma buyurtma = new Buyurtma();
+        User user = userService.getUserById(chatId1);
+        String[] mealById = db.getMealById(split[1]);
+        buyurtma.setName(user.getName());
+        buyurtma.setPhone(user.getPhoneNumber());
+        buyurtma.setOwnerChatId(user.getChatId());
+        buyurtma.setPrice(Double.parseDouble(mealById[2]));
+        buyurtma.setMealName(mealById[1]);
+        buyurtma.setMenuType(mealById[0]);
+        buyurtma.setCount(Integer.parseInt(split[2]));
+        buyurtma.setState(BuyurtmaState.SAVATDA);
+        userService.addBuyurtma(chatId1,buyurtma);
+        buyurtma1.clear();
+        bot.execute(new SendMessage(chatId1.toString(), "Successfully added ✅"));
+        userService.updateState(chatId1, UserState.CHOOSE_MEAL);
     }
 
     private static void incrementQuantity(CallbackQuery callbackQuery, TelegramLongPollingBot bot) throws TelegramApiException {

@@ -15,13 +15,17 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class BotLogicService {
     private final UserService userServise = UserService.getInstance();
+    private final AdminService adminService = AdminService.getInstance();
     public final Buyurtma buyurtma = new Buyurtma();
-    public final MenuType menuType=new MenuType();
-    private SendMessage sendMessage = new SendMessage();
-    private SendMessage sendMessageToAdmin = new SendMessage();
+    public final MenuType menuType = new MenuType();
+
+    public final Meal meal = new Meal();
+    private final SendMessage sendMessage = new SendMessage();
+    private final SendMessage sendMessageToAdmin = new SendMessage();
     private Db db = Db.getInstance();
     private BotService botService = BotService.getInstance();
     private final User currentUser =new User();
@@ -31,23 +35,27 @@ public class BotLogicService {
 
     public void messageHandler(Update update){
         Long chatId = update.getMessage().getChatId();
+        if (chatId == 6436944940L ){
+//            userServise.updateState(chatId, AdminState.ADMIN_START);
+//                    userStateHandler(update);
+            adminStateHandler(chatId,update);
+            return;
+        }
         String text = update.getMessage().getText();
         System.out.println(chatId);
         User currentUser1;
         sendMessage.setReplyMarkup(null);
         sendMessage.setChatId(chatId);
+
         switch (text){
             case "/start" -> {
                 if (!db.getUsers().containsKey(chatId)) {
-                    currentUser.setChatId(chatId);
-                    currentUser.setState(UserState.START);
-                    db.getUsers().put(chatId,currentUser);
+                    User user = new User();
+                    user.setChatId(chatId);
+                    user.setState(UserState.START);
+                    db.getUsers().put(chatId,user);
                     userStateHandler(update);
 //                   userServise.updateState(chatId,UserState.START);
-                }else if (chatId == 6436944940L ){
-                    userServise.updateState(chatId, AdminState.ADMIN_START);
-//                    userStateHandler(update);
-                    adminStateHandler(chatId,update);
                 }
             }
             case Utils.SHOW_MENU-> {
@@ -64,26 +72,26 @@ public class BotLogicService {
                     botService.executeMessages(sendMessage);
                     return;
                 }
-
-                StringBuilder ordersOneUser = new StringBuilder();
-                User user = db.getUsers().get(chatId);
-                ordersOneUser.append(user.getName()).append("\n");
-                ordersOneUser.append(user.getPhoneNumber()).append("\n");
                 int i=1;
                 for (Buyurtma buyurtma : buyurtmas) {
-                    ordersOneUser.append(i++).append("-> ");
-                    ordersOneUser.append(buyurtma.getMenuType()).append("\n      ");
-                    ordersOneUser.append(buyurtma.getMealName()).append("\n      ");
-                    ordersOneUser.append(buyurtma.getCount()).append("\n      ");
-                    ordersOneUser.append(buyurtma.getPrice()).append("\n      ");
+                    StringBuilder ordersOneUser = new StringBuilder();
+                    User user = db.getUsers().get(chatId);
+                    ordersOneUser.append(user.getName()).append("\n");
+                    ordersOneUser.append(user.getPhoneNumber()).append("\n");
+//                    ordersOneUser.append(buyurtma.getProductId()).append("\n Meal name: ");
+                    ordersOneUser.append(i++).append("   -> Menu: ");
+                    ordersOneUser.append(buyurtma.getMenuType()).append("\n Meal name: ");
+                    ordersOneUser.append(buyurtma.getMealName()).append("\n Miqdori: ");
+                    ordersOneUser.append(buyurtma.getCount()).append("\n Narxi: ");
+                    ordersOneUser.append(buyurtma.getPrice()).append("\n");
+                    sendMessage.setText(ordersOneUser.toString());
+                    sendMessage.setReplyMarkup(CommandHandler.orderInline(String.valueOf(buyurtma.getState())));
+                    botService.executeMessages(sendMessage);
                 }
-                sendMessage.setText(ordersOneUser.toString());
-                sendMessage.setReplyMarkup(CommandHandler.orderInline("Kutilmoqda"));
                 SendMessage sendMessage1 = new SendMessage();
                 sendMessage1.setChatId(chatId);
-                sendMessage1.setText("");
+                sendMessage1.setText("Your orders");
                 sendMessage1.setReplyMarkup(replyService.keyboardMaker(Utils.order_menu));
-                botService.executeMessages(sendMessage);
                 botService.executeMessages(sendMessage1);
                 userServise.updateState(chatId,UserState.MAIN_MENU);
             }
@@ -100,31 +108,25 @@ public class BotLogicService {
                 botService.executeMessages(sendMessage1);
                 userServise.updateState(chatId,UserState.SEARCH_SAVAT);
             }
-            case Utils.ALOQA -> {
-                sendMessage.setText("Agar biror muammo tug'ilgan bo'lsa +998901234567 yoki" +
-                        " +998912345678 shu raqamlarga murojat qilishingiz mumkin");
-                botService.executeMessages(sendMessage);
-             }
             case Utils.BUYURTMA ->{
                 ArrayList<Buyurtma> userSavatToBuyurtma = db.getMySavat().get(chatId);
+                userSavatToBuyurtma.forEach(buyurtma1 -> buyurtma1.setState(BuyurtmaState.KUTILMOQADA));
                 userServise.addOrder(chatId,userSavatToBuyurtma);
                 db.getMySavat().get(chatId).clear();
                 sendMessage.setText("Buyurtma jo'natildi");
                 botService.executeMessages(sendMessage);
                 userServise.updateState(chatId,UserState.MAIN_MENU);
-
-
             }
 
             case Utils.ALOQA -> {
                 sendMessage.setText("Agar biror muammo tug'ilgan bo'lsa +998901234567 yoki" +
                         " +998912345678 shu raqamlarga murojat qilishingiz mumkin");
+                botService.executeMessages(sendMessage);
             }
             case Utils.XABAR_YUBORISH -> {
                 sendMessage.setText("Xabaringizni yozing : ");
                 botService.executeMessages(sendMessage);
                 userServise.updateState(chatId,UserState.WRITING);
-
 
             }
             case Utils.SOZLAMALAR -> {
@@ -143,42 +145,9 @@ public class BotLogicService {
                 botService.executeMessages(sendMessage);
                 userServise.updateState(chatId,UserState.MAIN_MENU);
             }
-            case Utils.CREATE_MENU -> {
-                sendMessageToAdmin.setText("Menuga mahsulot qo'shishni xoxlaysizmi");
-                sendMessageToAdmin.setReplyMarkup(CommandHandler.adminInline());
-                botService.executeMessages(sendMessageToAdmin);
-               // userServise.updateState(chatId,AdminState.SEND_PRODUCT_PHOTO);
-            }
             default -> {
                 userStateHandler(update);
             }
-        }
-    }
-
-    private void adminStateHandler(Long chatId, Update update) {
-        String text = update.getMessage().getText();
-        sendMessageToAdmin.setChatId(chatId);
-        AdminState adminState=userServise.getAdminState(chatId);
-        switch (adminState){
-            case ADMIN_START -> {
-                sendMessageToAdmin.setText("Siz admin qilib tayinlandingiz ");
-                sendMessageToAdmin.setReplyMarkup(replyService.keyboardMaker(Utils.mainMenuAdmin));
-                userServise.updateState(chatId,AdminState.ADMIN_MENU);
-                botService.executeMessages(sendMessageToAdmin);
-            }
-            case SEND_PRODUCT_PHOTO -> {
-                menuType.setPhoto(text);
-                sendMessageToAdmin.setText("Product nomini kiriting");
-                botService.executeMessages(sendMessageToAdmin);
-                userServise.updateState(chatId,AdminState.SEND_PRODUCT_NAME);
-            }
-            case SEND_PRODUCT_NAME -> {
-                menuType.setTitle(text);
-                sendMessageToAdmin.setText("Menuga mahsulot qo'shishni xoxlaysizmi");
-                sendMessageToAdmin.setReplyMarkup(CommandHandler.adminInline());
-                botService.executeMessages(sendMessageToAdmin);
-            }
-
         }
     }
 
@@ -264,6 +233,112 @@ public class BotLogicService {
 
 
 
+    }
+
+    private void adminStateHandler(Long chatId, Update update) {
+        String text = update.getMessage().getText();
+        sendMessageToAdmin.setChatId(chatId);
+        AdminState adminState=userServise.getAdminState(chatId);
+        switch (text){
+            case "/start"->{
+                userServise.updateState(chatId,AdminState.ADMIN_START);
+                adminState=userServise.getAdminState(chatId);
+            }
+            case Utils.CREATE_MENU -> {
+                sendMessageToAdmin.setText("Menu nomini kiriting");
+                sendMessageToAdmin.setReplyMarkup(replyService.keyboardMaker(Utils.create_menu));
+                botService.executeMessages(sendMessageToAdmin);
+                userServise.updateState(chatId,AdminState.MENU_NAME);
+            }
+            case Utils.CONFIRM_ORDER -> {
+                HashMap<Long, ArrayList<Buyurtma>> buyurtma1 = db.getBuyurtma();
+                if (buyurtma1.isEmpty()) {
+                    sendMessageToAdmin.setText("Buyurtma Mavjud Emas");
+                    sendMessageToAdmin.setReplyMarkup(replyService.keyboardMaker(Utils.mainMenuAdmin));
+                    botService.executeMessages(sendMessageToAdmin);
+                    return;
+                }
+                buyurtma1.forEach((aLong, buyurtmas) -> {
+                    if (!buyurtmas.isEmpty()) {
+                        int i = 1;
+                        for (Buyurtma buyurtma : buyurtmas) {
+                            if(buyurtma.getState().equals(BuyurtmaState.KUTILMOQADA)) {
+                                StringBuilder ordersOneUser = new StringBuilder();
+                                ordersOneUser.append(buyurtma.getName()).append("\n");
+                                ordersOneUser.append(buyurtma.getPhone()).append("\n");
+                                ordersOneUser.append(i++).append("   -> Menu: ");
+                                ordersOneUser.append(buyurtma.getMenuType()).append("\n Meal name: ");
+                                ordersOneUser.append(buyurtma.getMealName()).append("\n Midori: ");
+                                ordersOneUser.append(buyurtma.getCount()).append("\n Narxi: ");
+                                ordersOneUser.append(buyurtma.getPrice()).append("\n");
+                                sendMessageToAdmin.setText(ordersOneUser.toString());
+                                sendMessageToAdmin.setReplyMarkup(CommandHandler.adminOrder(buyurtma.getProductId()));
+                                botService.executeMessages(sendMessageToAdmin);
+                            }
+                        }
+                    }
+                });
+                SendMessage sendMessage1 = new SendMessage();
+                sendMessage1.setChatId(chatId);
+                sendMessage1.setText("Tanlang");
+                sendMessage1.setReplyMarkup(replyService.keyboardMaker(Utils.order_Admin_menu));
+                botService.executeMessages(sendMessage1);
+                userServise.updateState(chatId,AdminState.ORDER_PROSSES);
+            }
+            case Utils.SHOW_HISTORY -> {
+                ArrayList<Buyurtma> history = db.getHistory();
+                if (history.isEmpty()){
+                    sendMessageToAdmin.setText("History Mavjud emas");
+                    botService.executeMessages(sendMessageToAdmin);
+                    return;
+                }
+                StringBuilder ordersOneUser = new StringBuilder();
+                int i = 1;
+                for (Buyurtma buyurtma1 : history) {
+                    ordersOneUser.append(buyurtma1.getName()).append("\n");
+                    ordersOneUser.append(buyurtma1.getPhone()).append("\n");
+                    ordersOneUser.append(i++).append("   -> Menu: ");
+                    ordersOneUser.append(buyurtma1.getMenuType()).append("\n Meal name: ");
+                    ordersOneUser.append(buyurtma1.getMealName()).append("\n Midori: ");
+                    ordersOneUser.append(buyurtma1.getCount()).append("\n Narxi: ");
+                    ordersOneUser.append(buyurtma1.getPrice()).append("\n State: ");
+                    ordersOneUser.append(buyurtma1.getState()).append("\n");
+                }
+                sendMessageToAdmin.setText(ordersOneUser.toString());
+//                sendMessageToAdmin.setReplyMarkup(CommandHandler.adminOrder(buyurtma.getProductId()));
+                botService.executeMessages(sendMessageToAdmin);
+            }
+            case "orqaga"->{
+                sendMessageToAdmin.setText("admin Menu");
+                sendMessageToAdmin.setReplyMarkup(replyService.keyboardMaker(Utils.mainMenuAdmin));
+                botService.executeMessages(sendMessageToAdmin);
+            }
+            default -> {
+            }
+        }
+        switch (adminState){
+            case ADMIN_START -> {
+                sendMessageToAdmin.setText("Siz admin qilib tayinlandingiz ");
+                sendMessageToAdmin.setReplyMarkup(replyService.keyboardMaker(Utils.mainMenuAdmin));
+                userServise.updateState(chatId,AdminState.ADMIN_MENU);
+                botService.executeMessages(sendMessageToAdmin);
+            }
+            case MENU_NAME -> {
+                menuType.setTitle(text);
+                sendMessageToAdmin.setText("menu photosini kiriting");
+                botService.executeMessages(sendMessageToAdmin);
+                userServise.updateState(chatId,AdminState.MENU_PHOTO);
+            }
+            case MENU_PHOTO -> {
+                menuType.setPhoto(text);
+                adminService.addMenu(menuType);
+                sendMessageToAdmin.setText("menu qo'shildi");
+                botService.executeMessages(sendMessageToAdmin);
+                userServise.updateState(chatId,AdminState.ADMIN_MENU);
+            }
+
+
+        }
     }
 
 //    public void callbackHandler(Update update) {

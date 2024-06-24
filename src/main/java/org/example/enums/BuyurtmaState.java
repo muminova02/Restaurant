@@ -4,5 +4,8 @@ public enum BuyurtmaState {
     CHALA,
     FINISH,
     SAVATDA,
+    KUTILMOQADA,
+    CONFIRMED,
+    CANCELED,
 
 }

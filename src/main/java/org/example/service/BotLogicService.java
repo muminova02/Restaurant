@@ -13,8 +13,11 @@ import org.example.enums.UserState;
 import org.example.payload.InlineString;
 import org.example.util.Utils;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -141,6 +144,13 @@ public class BotLogicService {
                     botService.executeMessages(sendMessage);
             }
             case "orqaga"->{
+                if (userServise.getUserState(chatId).equals(UserState.CHOOSE_MEAL)){
+                    sendMessage.setText("choose menu type:");
+                    sendMessage.setReplyMarkup(replyService.keyboardMaker(db.getAllMeals().keySet()));
+                    botService.executeMessages(sendMessage);
+                    userServise.updateState(chatId,UserState.CHOOSE_MENU);
+                    return;
+                }
                 sendMessage.setText("main menu");
                 sendMessage.setReplyMarkup(replyService.keyboardMaker(Utils.mainMenuUser));
                 botService.executeMessages(sendMessage);
@@ -196,6 +206,11 @@ public class BotLogicService {
                     if (menuType.getTitle().equals(text)){
                         buyurtma.setMenuType(text);
                         buyurtma.setState(BuyurtmaState.CHALA);
+                        SendPhoto sendPhoto = new SendPhoto();
+                        sendPhoto.setChatId(chatId);
+                        sendPhoto.setPhoto(new InputFile(new File(menuType.getPhoto())));
+                        sendPhoto.setCaption(menuType.getTitle());
+                        botService.executeMessages(sendPhoto);
                         sendMessage.setText("choose Meal : ");
                         sendMessage.setReplyMarkup(replyService.keyboardMaker(meals));
                         botService.executeMessages(sendMessage);
@@ -208,16 +223,22 @@ public class BotLogicService {
                     if(buyurtma.getMenuType().equals(menuType.getTitle())){
                         for (Meal meal : meals) {
                             if (meal.getTitle().equals(text)){
-                                buyurtma.setMealName(text);
-                                User user = db.getUsers().get(chatId);
-                                buyurtma.setName(user.getName());
-                                buyurtma.setPhone(user.getPhoneNumber());
-                                buyurtma.setPrice(meal.getPrice());
-                                sendMessage.setText("Photo\n"+"name:"+meal.getTitle()+"\nDescription: "+ meal.getDescription()
+//                                buyurtma.setMealName(text);
+//                                User user = db.getUsers().get(chatId);
+//                                buyurtma.setName(user.getName());
+//                                buyurtma.setPhone(user.getPhoneNumber());
+//                                buyurtma.setPrice(meal.getPrice());
+                                SendPhoto sendPhoto = new SendPhoto();
+                                sendPhoto.setChatId(chatId);
+                                sendPhoto.setPhoto(new InputFile(new File(meal.getPhoto())));
+                                sendPhoto.setCaption("name:"+meal.getTitle()+"\nDescription: "+ meal.getDescription()
                                         +"\nPrice: " + meal.getPrice());
-                                sendMessage.setReplyMarkup(CommandHandler.productMurkup(1,Long.parseLong(meal.getId())));
-                                botService.executeMessages(sendMessage);
-                                userServise.updateState(chatId,UserState.CHOOSE_COUNT);
+                                sendPhoto.setReplyMarkup(CommandHandler.productMurkup(1,Long.parseLong(meal.getId())));
+                                botService.executeMessages(sendPhoto);
+//                                sendMessage.setText();
+//                                botService.executeMessages(sendMessage);
+
+                                userServise.updateState(chatId,UserState.CHOOSE_MEAL);
                             }
                         }
                     }

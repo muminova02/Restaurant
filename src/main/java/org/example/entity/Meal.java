@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Random;
+import java.util.UUID;
 
 
 @Data
@@ -13,7 +14,7 @@ import java.util.Random;
 @AllArgsConstructor
 @Builder
 public class Meal {
-    private String id = String.valueOf(new Random().nextInt(1,9999));
+    private String id = UUID.randomUUID().toString();
     private String title;
     private String photo;
     private String Description;

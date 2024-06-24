@@ -3,12 +3,15 @@ package org.example.db;
 import lombok.*;
 import org.example.entity.*;
 
-import org.example.enums.UserState;
+import org.example.enums.AdminState;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Data
 public class Db {
+
+    private final ArrayList<Integer> uniqMealId = new ArrayList<>();
     private final HashMap<MenuType, ArrayList<Meal>> allMeals = new HashMap<>();
 
     private final HashMap<Long,User> users = new HashMap<>();
@@ -17,11 +20,47 @@ public class Db {
 
     private final HashMap<Long,Xabar> xabarlar=new HashMap<>();
 
-    private final Set<MenuType> menuTypeSet=new HashSet<>();
+//    private final Set<MenuType> menuTypeSet=new HashSet<>();
+
+    private final ArrayList<Buyurtma> history = new ArrayList<>();
 
 
     private final HashMap<Long,ArrayList<Buyurtma>> buyurtma = new HashMap<>();
 
+
+
+    public Buyurtma getBuyurtma(String productId){
+        ArrayList<Buyurtma> buyurtmasID = new ArrayList<>();
+        buyurtma.forEach((aLong, buyurtmas) -> {
+            for (Buyurtma buyurtma1 : buyurtmas) {
+                if (buyurtma1.getProductId().equals(productId)){
+                    buyurtmasID.addAll(buyurtmas);
+                    break;
+                }
+            }
+        });
+        for (Buyurtma buyurtma1 : buyurtmasID) {
+            if (buyurtma1.getProductId().equals(productId)) {
+                return buyurtma1;
+            }
+        }
+        return null;
+    }
+
+    public String[] getMealById(String id){
+        String[] allMMP = new String[3];
+        db.getAllMeals().forEach((menuType, meals) ->{
+            for (Meal meal : meals) {
+                if (meal.getId().equals(id)) {
+                    allMMP[0] = menuType.getTitle();
+                    allMMP[1]=meal.getTitle();
+                    allMMP[2]= String.valueOf(meal.getPrice());
+                    break;
+                }
+            }
+        });
+        return allMMP;
+    }
 
 
 //    public void addUser(User main) {
@@ -36,6 +75,9 @@ public class Db {
 //        }
 //        return Optional.empty();
 //    }
+
+//    public Buyurtma getBuyurtmaById()
+
 
     private static Db db;
 
@@ -92,9 +134,9 @@ public class Db {
 
     }
 
-    public void createMenu(MenuType menu){
-        menuTypeSet.add(menu);
-    }
+//    public void createMenu(MenuType menu){
+//        menuTypeSet.add(menu);
+//    }
 
 
 

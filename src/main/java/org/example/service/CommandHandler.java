@@ -28,13 +28,14 @@ public class CommandHandler {
                                 .callbackData(buyurtma.getProductId()).build())).build();
         return build;
     }
-    public static InlineKeyboardMarkup orderInline(String s){
+    public static InlineKeyboardMarkup orderInline(String s) {
         InlineKeyboardMarkup build = InlineKeyboardMarkup.builder()
                 .keyboardRow(List.of(
                         InlineKeyboardButton.builder()
                                 .text(s)
                                 .callbackData(s).build())).build();
-
+        return build;
+    }
     public static InlineKeyboardMarkup adminInline(){
         InlineKeyboardMarkup build=InlineKeyboardMarkup.builder()
                 .keyboardRow(List.of(
@@ -42,6 +43,14 @@ public class CommandHandler {
                         InlineKeyboardButton.builder().text("Ha").callbackData("ha").build()
                 )).build();
 
+        return build;
+    }
+    public static InlineKeyboardMarkup adminOrder(String productId){
+        InlineKeyboardMarkup build=InlineKeyboardMarkup.builder()
+                .keyboardRow(List.of(
+                        InlineKeyboardButton.builder().text("Confirm").callbackData("Confirm;" + productId).build(),
+                        InlineKeyboardButton.builder().text("Canceled").callbackData("Canceled;" + productId).build()
+                )).build();
         return build;
     }
 }

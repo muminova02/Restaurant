@@ -7,13 +7,15 @@ import lombok.NoArgsConstructor;
 import org.example.enums.BuyurtmaState;
 
 import java.util.Random;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Buyurtma {
-    private String productId;
+    private String productId = UUID.randomUUID().toString();
+    private Long ownerChatId;
     private String  name;
     private String phone;
     private String menuType;
@@ -27,5 +29,18 @@ public class Buyurtma {
         count=0;
         price=0d;
         state=BuyurtmaState.CHALA;
+    }
+
+    @Override
+    public String toString() {
+        return "Buyurtma{" +
+                "\nname='" + name + '\'' +
+                ",\nphone='" + phone + '\'' +
+                ",\nmenuType='" + menuType + '\'' +
+                ",\nmealName='" + mealName + '\'' +
+                ",\ncount=" + count +
+                ",\nprice=" + price +
+                ",\nstate=" + state +
+                '}';
     }
 }

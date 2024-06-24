@@ -17,7 +17,11 @@ public class UserService {
     private final ReplyMarkupService replyMarkupService = new ReplyMarkupService();
     private final InlineMarkupService inlineMarkupService = new InlineMarkupService();
 
-    public static void updateState(Long chatId, State state){
+    public User getUserById(Long userId){
+        return db.getUsers().get(userId);
+    }
+
+    public void updateState(Long chatId, State state){
         HashMap<Long, User> users = db.getUsers();
         users.forEach((aLong, user) ->{
             if(Objects.equals(aLong, chatId)){

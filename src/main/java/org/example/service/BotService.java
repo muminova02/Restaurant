@@ -52,7 +52,8 @@ public class BotService extends TelegramLongPollingBot {
 
     @Override
     public String getBotToken() {
-        return "7454034418:AAFQZctNIWuqMFsi-of5OVI4cl4oQ04j3vU";
+        // Read from the BOT_TOKEN environment variable — never hardcode the token.
+        return System.getenv("BOT_TOKEN");
     }
 
 
